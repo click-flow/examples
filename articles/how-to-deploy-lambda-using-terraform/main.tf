@@ -13,19 +13,20 @@ terraform {
 	}
 }
 
+// 1) Provide your access and secret keys to AWS
 provider "aws" {
 	access_key = "TODO-my-access-key"
 	secret_key = "TODO-my-secret-key"
 	region="us-east-1"
 }
 
-// 1) Setup function name and Zip file that will be uploaded to AWS
+// 2) Setup function name and Zip file that will be uploaded to AWS
 locals {
 	function_name = "hello-world-lambda"
 	zip_file = "${path.module}/hello-world-lambda.zip"
 }
 
-// 2) Create a .zip file on your local computer which includes
+// 3) Create a .zip file on your local computer which includes
 //    only our index.js file
 data "archive_file" "zip" {
 	excludes = [
