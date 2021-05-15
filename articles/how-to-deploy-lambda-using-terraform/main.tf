@@ -20,9 +20,15 @@ provider "aws" {
 	region="us-east-1"
 }
 
-// 2) Setup function name and Zip file that will be uploaded to AWS
+// 2) Setup Lambda parameters and Zip file that will be uploaded to AWS
 locals {
+	// Function parameters
 	function_name = "hello-world-lambda"
+	handler = "index.handler"
+	runtime = "nodejs14.x"
+	timeout = 6
+
+	// Zip file that will be uploaded to AWS
 	zip_file = "${path.module}/hello-world-lambda.zip"
 }
 
@@ -59,4 +65,27 @@ resource "aws_iam_role" "default" {
 resource "aws_iam_role_policy_attachment" "default" {
 	policy_arn  = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 	role = aws_iam_role.default.name
+}
+
+// 5) Provision your Lambda resource inside AWS
+resource "aws_lambda_function" "default" {
+	// Function parameters
+	function_name = local.function_name
+	handler = local.handler
+	runtime = local.runtime
+	timeout = local.timeout
+
+	// Upload .zip file to AWS
+	filename = local.zip_file
+	source_code_hash = data.archive_file.zip.output_base64sha256
+
+	// Code and AWS IAM to mange
+	role = aws_iam_role.default.arn
+
+	// Optional environmental variables
+	environment {
+		variables = {
+			NODE_ENV: "production"
+		}
+	}
 }
