@@ -37,3 +37,26 @@ data "archive_file" "zip" {
 	source_dir = path.module
 	type = "zip"
 }
+
+// 4) Create an AWS IAM role which will manage your Lambda in
+//    production.
+data "aws_iam_policy_document" "default" {
+	version = "2012-10-17"
+
+	statement {
+		actions = ["sts:AssumeRole"]
+		effect = "Allow"
+
+		principals {
+			identifiers = ["lambda.amazonaws.com"]
+			type = "Service"
+		}
+	}
+}
+resource "aws_iam_role" "default" {
+	assume_role_policy = data.aws_iam_policy_document.default.json
+}
+resource "aws_iam_role_policy_attachment" "default" {
+	policy_arn  = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+	role = aws_iam_role.default.name
+}
