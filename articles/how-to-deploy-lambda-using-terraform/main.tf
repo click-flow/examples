@@ -115,6 +115,31 @@ resource "aws_lambda_function" "default" {
 	environment {
 		variables = {
 			NODE_ENV = "production"
+			SOME_API_KEY = "123456"
 		}
 	}
+}
+
+// 6) Use ClickFlow's public terrafore module to deploy your lambda for yo
+module "hello-world-lambda" {
+	source = "github.com/click-flow/terraform-modules.git//v0.15/aws-lambda/v2"
+
+	environment = [
+		{ key: "NODE_ENV", value: "production" },
+		{ key: "SOME_API_KEY", value: "123456" },
+	]
+	excluded_files = [
+		".env",
+		".terraform",
+		".terraform.lock.hcl",
+		"docker-compose.yml",
+		"main.tf",
+		"terraform.tfstate",
+		"terraform.tfstate.backup",
+	]
+	handler = "index.handler"
+	name = "hello-world-lambda-via-clickflow"
+	runtime = "nodejs14.x"
+	source_directory = path.module
+	timeout_after_seconds = 6
 }
