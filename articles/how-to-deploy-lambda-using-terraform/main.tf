@@ -36,21 +36,27 @@ locals {
 	timeout = 6
 
 	// The .zip file we will create and upload to AWS later on
-	zip_file = "${path.module}/hello-world-lambda.zip"
+	zip_file = "hello-world-lambda.zip"
 }
 
 // 3) Let terraform create a .zip file on your local computer which contains
 //    only our "index.js" file by ignoring any Terraform files (e.g. our .zip)
 data "archive_file" "zip" {
 	excludes = [
+		".env",
 		".terraform",
 		".terraform.lock.hcl",
+		"docker-compose.yml",
 		"main.tf",
+		"terraform.tfstate",
+		"terraform.tfstate.backup",
 		local.zip_file,
 	]
-	output_path = local.zip_file
 	source_dir = path.module
 	type = "zip"
+
+	// Create the .zip file in the same directory as the index.js file
+	output_path = "${path.module}/${local.zip_file}"
 }
 
 // 4) Create an AWS IAM resource who will act as an intermediary between
